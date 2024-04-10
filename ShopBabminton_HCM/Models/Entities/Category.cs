@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ShopBabminton_HCM.Models.Entities
 {
@@ -6,8 +7,9 @@ namespace ShopBabminton_HCM.Models.Entities
     public class Category
     {
         public Guid Id { get; set; }
-        public string NameCategory { get; set; }
-        public string Description { get; set; }
+        [Required]
+        public string CategoryName { get; set; }
+        public string? Description { get; set; }
 
         public ICollection<Product> Product { get; set; }
     }

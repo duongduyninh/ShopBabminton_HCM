@@ -9,5 +9,6 @@ namespace ShopBabminton_HCM.Interfaces
         public Task<bool> CreateCartAsync();
         public Task<string> SignInAsync(SignInDTO model);
         public Task<string> SignOutAsync();
+        public Task<bool> CheckUserIdValidAsync(string model);
     }
 }

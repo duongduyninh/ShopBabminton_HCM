@@ -11,10 +11,11 @@ namespace ShopBabminton_HCM.Models.Entities
         public double Price { get; set; }
         public int Quantity { get; set; }   
         public Guid CategoryId { get; set; }
+        public int Status { get; set; }
 
         public Category Category { get; set; }
 
         public virtual ICollection<CartDetail> CartDetail { get; set; }
-       public virtual ICollection<OrderDetail> OrderDetail { get; set; }
+       public virtual ICollection<OrderDetail> OrderDetail { get; set; }    
     }
 }

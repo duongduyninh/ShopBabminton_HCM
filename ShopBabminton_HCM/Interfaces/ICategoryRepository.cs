@@ -4,9 +4,11 @@ namespace ShopBabminton_HCM.Interfaces
 {
     public interface ICategoryRepository
     {
-        public Task<bool> CheckCategoryIdExistAsync(Guid model);
-        public Task<bool> CheckCategoryNameExistAsync(string model);
-        public Task<bool> AddCategoryAsync(AddCategoryDTO model);
+        public Task<bool> CheckCategoryIdValidAsync(Guid model);
+        public Task<bool> CheckCategoryNameValidAsync(string model);
+        public Task<CategoryInfo> AddCategoryAsync(AddCategoryRequest model);
+        public Task<bool> DeleteCategoryAsync(Guid categoryId);
+        public Task<CategoryInfo> UpdateCategoryAsync(UpdateCategoryRequest model);
 
     }
 }

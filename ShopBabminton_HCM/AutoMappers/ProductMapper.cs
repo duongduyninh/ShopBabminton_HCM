@@ -8,7 +8,10 @@ namespace ShopBabminton_HCM.AutoMappers
     {
         public ProductMapper() 
         { 
-            CreateMap<Product , AddProductDTO>().ReverseMap();
+            CreateMap<Product , AddProductRequest>().ReverseMap();
+            CreateMap<Product , UpdateProductRequest>().ReverseMap();
+            CreateMap<Product , ProductInfo>().ReverseMap();    
+           
         }
     }
 }

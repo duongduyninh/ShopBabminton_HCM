@@ -8,7 +8,8 @@ namespace ShopBabminton_HCM.AutoMappers
     {
         public CategoryMapper() 
         {
-            CreateMap<Category, AddCategoryDTO>().ReverseMap();
+            CreateMap<Category , AddCategoryRequest>().ReverseMap();
+            CreateMap<Category, UpdateCategoryRequest>().ReverseMap();
         }
     }
 }

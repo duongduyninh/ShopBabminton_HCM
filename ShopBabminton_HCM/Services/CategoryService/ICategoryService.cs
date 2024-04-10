@@ -4,6 +4,8 @@ namespace ShopBabminton_HCM.Services.CategoryService
 {
     public interface ICategoryService
     {
-        public Task<bool> AddCategoryAsync(AddCategoryDTO model);
+        public Task<AddCategoryResponse> AddCategoryAsync(AddCategoryRequest model);
+        public Task<DeleteCategoryResponse> DeleteCategoryAsync(Guid categoryId);
+        public Task<UpdateCategoryResponse> UpdateCategoryAsync(UpdateCategoryRequest model);
     }
 }

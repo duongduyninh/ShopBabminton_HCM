@@ -9,6 +9,7 @@ using ShopBabminton_HCM.Repositories;
 using ShopBabminton_HCM.Services.AuthenticationService;
 using ShopBabminton_HCM.Services.CartService;
 using ShopBabminton_HCM.Services.CategoryService;
+using ShopBabminton_HCM.Services.OrderService;
 using ShopBabminton_HCM.Services.ProductService;
 using System.Text;
 
@@ -42,6 +43,9 @@ builder.Services.AddScoped<ICategoryService , CategoryService>();
 
 builder.Services.AddScoped<ICartRepository , CartRepository>();
 builder.Services.AddScoped<ICartService, CartService>();
+
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IOrderService , OrderService>(); 
 
 
 builder.Services.AddAuthentication(options =>

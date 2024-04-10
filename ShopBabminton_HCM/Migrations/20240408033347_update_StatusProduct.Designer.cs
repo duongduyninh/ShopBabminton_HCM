@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ShopBabminton_HCM.Data;
 
@@ -11,9 +12,11 @@ using ShopBabminton_HCM.Data;
 namespace ShopBabmintonHCM.Migrations
 {
     [DbContext(typeof(DbContextStoreBabmintion))]
-    partial class DbContextStoreBabmintionModelSnapshot : ModelSnapshot
+    [Migration("20240408033347_update_StatusProduct")]
+    partial class updateStatusProduct
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -274,11 +277,12 @@ namespace ShopBabmintonHCM.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("CategoryName")
+                    b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("NameCategory")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");

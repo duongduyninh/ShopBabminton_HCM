@@ -19,29 +19,57 @@ namespace ShopBabminton_HCM.Repositories
             _mapper = mapper;
             _context = context;
         } 
-        public async Task<bool> CheckCategoryIdExistAsync(Guid categoryId)
-        {
-            return await _context.Categorys.AnyAsync(x => x.Id == categoryId);
-        }
-        public async Task<bool> CheckCategoryNameExistAsync(string nameCategory)
-        {
-            var checkCategoryName = await _context.Categorys.AnyAsync(x => x.NameCategory == nameCategory);
-            return checkCategoryName;
-           
-        }
-        public async Task<bool> AddCategoryAsync(AddCategoryDTO addCategory)
+      
+        public async Task<CategoryInfo> AddCategoryAsync(AddCategoryRequest addCategory)
         {
             try
             {
-                var newCatrgory = _mapper.Map<Category>(addCategory);
-                await _context.Categorys.AddAsync(newCatrgory);
-                _context.SaveChanges();
-                return true;
+                var addToCategory = _mapper.Map<Category>(addCategory);
+                await _context.Categorys.AddAsync(addToCategory);
+                await _context.SaveChangesAsync();
 
-            }catch (Exception ex)
+                return _mapper.Map<CategoryInfo>(addCategory);
+
+            }catch { return null; }
+            
+        }
+
+        public async Task<bool> DeleteCategoryAsync(Guid categoryId)
+        {
+            
+            var checkProductValidInCategory = await _context.Products.AnyAsync(x => x.CategoryId == categoryId);
+            if (checkProductValidInCategory)
             {
-                return false;
+                return false; 
             }
+
+            var categoryToRemove = await _context.Categorys.FindAsync(categoryId);
+            _context.Categorys.Remove(categoryToRemove);
+            await _context.SaveChangesAsync();
+            return true; 
+        }
+
+        public async Task<CategoryInfo> UpdateCategoryAsync(UpdateCategoryRequest updateCategory)
+        {
+            try
+            {
+                var category = await _context.Categorys.FindAsync(updateCategory.CategoryId);
+                _mapper.Map(updateCategory, category);
+                await _context.SaveChangesAsync();
+
+                return _mapper.Map<CategoryInfo>(updateCategory);
+            }
+            catch {  return null; }
+        }
+
+        public async Task<bool> CheckCategoryIdValidAsync(Guid categoryId)
+        {
+            return await _context.Categorys.AnyAsync(x => x.Id == categoryId);
+        }
+
+        public async Task<bool> CheckCategoryNameValidAsync(string categoryName)
+        {
+            return await _context.Categorys.AnyAsync(x => x.CategoryName == categoryName);
         }
 
     }

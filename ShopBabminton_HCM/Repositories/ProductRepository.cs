@@ -21,75 +21,78 @@ namespace ShopBabminton_HCM.Repositories
             _mapper = mapper;
             _categoryRepository = categoryRepository;
         }
-        public async Task<AddProductResultDTO> AddProductAsync(AddProductDTO addProduct)
+        public async Task<ProductInfo> AddProductAsync(AddProductRequest addProduct)
         {
             try
             {
-                var checkProductExistAsync = await CheckProductExistAsync(addProduct.ProductName);
-                if (checkProductExistAsync)
-                {
-                    return new AddProductResultDTO { Status = false, ErrorMessage = "Product valid" };
-                }
+                var addToProdcut = _mapper.Map<Product>(addProduct);
+                _context.Products.AddAsync(addToProdcut);
 
-                var categoryValid = await _categoryRepository.CheckCategoryIdExistAsync(addProduct.CategoryId);
-                if (categoryValid)
-                {
-                    var newProduct = _mapper.Map<Product>(addProduct);
-                    var productId = await _context.Products.AddAsync(newProduct);
-                    _context.SaveChanges();
-                    return new AddProductResultDTO { ProductId = productId.Entity.Id, Status = true };
-                }
-                else
-                {
-                    return new AddProductResultDTO { Status = false, ErrorMessage = "Invalid category id" };
-                }
-            }
-            catch (Exception ex)
+                await _context.SaveChangesAsync();
+
+                return _mapper.Map<ProductInfo>(addToProdcut);
+
+            }catch { return null; }
+        }
+
+        public async Task<ProductInfo> UpdateProductAsync(UpdateProductRequest updateProduct)
+        {
+            try
             {
-                return new AddProductResultDTO {  Status = false , ErrorMessage = ex.Message };
+                var productToUpdate = await _context.Products.FindAsync(updateProduct.ProductId);
+                _mapper.Map(updateProduct, productToUpdate);
+
+                await _context.SaveChangesAsync();
+
+                return _mapper.Map<ProductInfo>(productToUpdate);
+            }
+            catch 
+            {
+                return null;
             }
         }
 
-        public async Task<InfoProductDTO> GetProductAsync(Guid productId)
+        public async Task<ProductInfoById> GetProductAsync(Guid productId)
         {
             try
             {
-                bool checkProductExistAsync = await CheckProductIdExistAsync(productId);
+                bool checkProductExistAsync = await CheckProductIdValidAsync(productId);
                 if (!checkProductExistAsync)
                 {
-                    return new InfoProductDTO();
+                    return new ProductInfoById();
                 }
 
                 var getInfoProduct = await (from products in _context.Products
                                       join categorys in _context.Categorys on products.CategoryId equals categorys.Id
                                       where products.Id == productId
-                                      select new InfoProductDTO
+                                      select new ProductInfoById
                                       {
                                           ProductId = products.Id,
-                                          NameProduct = products.ProductName,
-                                          CategoryName = categorys.NameCategory,
+                                          ProductName = products.ProductName,
+                                          CategoryName = categorys.CategoryName,
                                           Description = products.Description,
                                           Quantity = products.Quantity, 
+                                          Price = products.Price
                                       }).FirstOrDefaultAsync();
                 return getInfoProduct; 
             }
             catch (Exception ex)
             {
-                return new InfoProductDTO();
+                return new ProductInfoById();
             }
         }
 
-        public async Task<List<InfoProductDTO>> GetListProductAsync()
+        public async Task<List<ProductInfoById>> GetListProductAsync()
         {
             try
             {
                 var getListInfoProducts = await (from products in _context.Products
                                               join categorys in _context.Categorys on products.CategoryId equals categorys.Id
-                                              select new InfoProductDTO
+                                              select new ProductInfoById
                                               {
                                                   ProductId = products.Id,
-                                                  NameProduct = products.ProductName,
-                                                  CategoryName = categorys.NameCategory,
+                                                  ProductName = products.ProductName,
+                                                  CategoryName = categorys.CategoryName,
                                                   Description = products.Description,
                                                   Quantity = products.Quantity
                                               }).ToListAsync();
@@ -102,45 +105,122 @@ namespace ShopBabminton_HCM.Repositories
             }
         }
 
-        public async Task<List<InfoProductDTO>> GetProductsByCategoryAsync(Guid categoryId)
+        public async Task<List<ProductInfoById>> GetProductsByCategoryIdAsync(Guid categoryId)
         {
-
-            try
+           var getInfoProduct = await (from products in _context.Products
+                                       join categorys in _context.Categorys on products.CategoryId equals categorys.Id
+                                       where categorys.Id == categoryId
+                                       select new ProductInfoById
+                                       {
+                                           ProductId = products.Id,
+                                           ProductName = products.ProductName,
+                                           CategoryName = categorys.CategoryName,
+                                           Description = products.Description,
+                                           Quantity = products.Quantity,
+                                       }).ToListAsync();
+            if (getInfoProduct != null)
             {
-                var categoryValid = await _categoryRepository.CheckCategoryIdExistAsync(categoryId);
-                if (!categoryValid)
-                {
-                  return new List<InfoProductDTO>();
-                }
-                var getInfoProduct = await (from products in _context.Products
-                                            join categorys in _context.Categorys on products.CategoryId equals categorys.Id
-                                            where categorys.Id == categoryId
-                                            select new InfoProductDTO
-                                            {
-                                                ProductId = products.Id,
-                                                NameProduct = products.ProductName,
-                                                CategoryName = categorys.NameCategory,
-                                                Description = products.Description,
-                                                Quantity = products.Quantity,
-                                            }).ToListAsync();
-                return getInfoProduct;
+              return getInfoProduct;
             }
-            catch (Exception ex)
+            else
             {
-                return new List<InfoProductDTO>();
+                return null;
             }
         }
 
-        public async Task<bool> CheckProductExistAsync(string productName)
+        public async Task<bool> CheckProductNameValidAsync(string productName)
         {
             return await _context.Products.AnyAsync( x=>x.ProductName == productName);
         }
-        public async Task<bool> CheckProductIdExistAsync(Guid productId)
+
+        public async Task<bool> CheckProductIdValidAsync(Guid productId)
         {
-            var tmp = await _context.Products.Where(x => x.Id == productId).AnyAsync();
-            return tmp;
-         
+            return await _context.Products.AnyAsync(x => x.Id == productId); 
         }
 
+        public async Task<bool> CheckProdcutQuantityAsync(Guid productId)
+        {
+            return await _context.Products.AnyAsync(x => x.Id == productId && x.Quantity > 0 );
+        }
+
+        public async Task<bool> DisableProductAsync(Guid productId)
+        {
+            var disableProduct = await _context.Products.FirstOrDefaultAsync(x => x.Id == productId);
+            if (disableProduct != null)
+            {
+                disableProduct.Status = 0;
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public async Task<List<GetAllProductResponse>> GetAllProductActiveAsync()
+        {
+            var getAllProductActive = await GetAllProductByStatusAsync(1);
+            return getAllProductActive;
+        }
+
+        public async Task<List<GetAllProductResponse>> GetAllProductInactiveAsync()
+        {
+            var getAllProductActive = await GetAllProductByStatusAsync(0);
+            return getAllProductActive;
+        }
+
+        public async Task<List<GetAllProductResponse>> GetAllProductByStatusAsync(int statusCustomize)
+        {
+            int statusCustomizeTMP = statusCustomize;
+            var StatusProducts = await(from product in _context.Products
+                                       join category in _context.Categorys on product.CategoryId equals category.Id
+                                       where product.Status != statusCustomizeTMP
+                                       select new GetAllProductResponse
+                                       {
+                                           ProductId = product.Id,
+                                           ProductName = product.ProductName,
+                                           Description = product.Description,
+                                           Price = product.Price,
+                                           Quantity = product.Quantity,
+                                           CategoryName = category.CategoryName
+                                       }).ToListAsync();
+
+            return StatusProducts;
+        }
+
+        public async Task<bool> UpdateProductStatusAsync(UpdateProductStatusRequest updateProductStatus)
+        {
+            var productToUpdate = await _context.Products.FirstOrDefaultAsync(x => x.Id == updateProductStatus.productId);
+            if (productToUpdate != null)
+            { 
+                productToUpdate.Status = updateProductStatus.Status;
+                await _context.SaveChangesAsync();
+                return true; 
+            } else { return false; }
+            
+        }
+
+        public async Task<ProductInfoById> GetProductInfoByIdAsync(Guid productId)
+        {
+            var infoProduct = await (from product in _context.Products
+                                     join category in _context.Categorys on product.CategoryId equals category.Id
+                                     where product.Id == productId
+                                     select new ProductInfoById 
+                                     {
+                                         ProductId = productId,
+                                         ProductName = product.ProductName,
+                                         Description = product.Description,
+                                         Price = product.Price,
+                                         Quantity = product.Quantity,
+                                         CategoryName = category.CategoryName
+                                     }).FirstOrDefaultAsync();
+            if (infoProduct != null)
+            {
+                return infoProduct;
+            }
+            else { return null; }
+        }
+   
     }
 }

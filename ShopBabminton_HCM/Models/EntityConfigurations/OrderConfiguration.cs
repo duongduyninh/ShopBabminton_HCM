@@ -13,7 +13,6 @@ namespace ShopBabminton_HCM.Models.EntityConfigurations
             builder.HasOne(x => x.User)
                 .WithMany(u => u.Order)
                 .HasForeignKey(x => x.UserId)
-                .IsRequired()
                 .OnDelete(DeleteBehavior.Restrict);
 
         }

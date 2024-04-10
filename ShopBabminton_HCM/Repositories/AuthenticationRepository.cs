@@ -110,6 +110,12 @@ namespace ShopBabminton_HCM.Repositories
 
         }
 
+        public async Task<bool> CheckUserIdValidAsync(string userId)
+        {
+            var result = await _userManager.FindByIdAsync(userId);  
+            if (result == null) { return false; }else { return true;}
+        }
+
         public Task<string> SignOutAsync()
         {
             throw new NotImplementedException();

@@ -8,7 +8,9 @@ namespace ShopBabminton_HCM.AutoMappers
     {
         public CartMapper()
         {
-            CreateMap<CartDetail , AddToCartDTO>().ReverseMap();
+            CreateMap<CartDetail , GetInfoInCartResultDTO>().ReverseMap();
+            CreateMap<CartDetail , UpdateCartRequest>().ReverseMap();
+            CreateMap<CartDetailInfo, UpdateCartRequest>().ReverseMap();
         }
     }
 }
