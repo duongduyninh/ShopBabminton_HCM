@@ -3,6 +3,7 @@ using ShopBabminton_HCM.Data;
 using ShopBabminton_HCM.Interfaces;
 using ShopBabminton_HCM.Models.Entities;
 using ShopBabminton_HCM.Helpers;
+using ShopBabminton_HCM.DTOs.OrderDTO;
 
 namespace ShopBabminton_HCM.Repositories
 {
@@ -17,13 +18,13 @@ namespace ShopBabminton_HCM.Repositories
             _productRepository = productRepository;
             _context = context;
         }
-        public async Task<bool> AddOrderAsync(string? userId, Guid cartId)
+        public async Task<InfoOrder> AddOrderAsync(AddOrderRequest addOrder)
         {
          
             var newOrder = new Order
             {
-                UserId = userId,
-                CartId = cartId,
+                UserId = addOrder.UserId,
+                CartId = addOrder.CartId,
                 Status = (int)Enums.OrderStatus.pendingConfirmation,
                 CreatedTime = DateTime.UtcNow,
             };
@@ -34,13 +35,67 @@ namespace ShopBabminton_HCM.Repositories
             if (checkNewOrder > 0 ) 
             {
                 bool addOrderDetail = await AddOrderDetailsAsync(orderId);
-                if (!addOrderDetail) { return false; }
+                if (!addOrderDetail) { return null; }
                 await _context.SaveChangesAsync();
-                return true;
+
+                var getInfoOrder = await GetInfoOrderAsync(orderId);
+                if (getInfoOrder != null)
+                {
+                    return getInfoOrder;
+                }
+                else
+                {
+                    return null;
+                }
             }
 
-            return false;
+            return null;
         }
+
+        public async Task<InfoOrder> GetInfoOrderAsync(Guid orderId)
+        {
+            var getInfoOrder = await (from order in _context.Orders
+                                      where order.Id == orderId
+                                      select new InfoOrder
+                                      {
+                                          Id = order.Id,
+                                          UserId = order.UserId,
+                                          CartId = order.CartId,
+                                          Status = order.Status,
+                                          CreatedTime = order.CreatedTime,
+                                      }).FirstOrDefaultAsync();
+            if (getInfoOrder == null)
+            {
+                return null;
+            }
+            else
+            {
+                return getInfoOrder;
+            }
+        }
+
+        public async Task<List<InfoOrderDetail>> GetInfoOrderDetailAsync(Guid orderId)
+        {
+            var getInfoOrderDetail = await (from orderDetail in _context.OrderDetails
+                                            where orderDetail.OrderId == orderId
+                                            select new InfoOrderDetail
+                                            {
+                                                OrderId= orderDetail.OrderId,
+                                                ProductId= orderDetail.ProductId,
+                                                ProductName= orderDetail.ProductName,
+                                                Price = orderDetail.Price,
+                                                Quantity = orderDetail.Quantity,
+                                                CreatedTime = DateTime.UtcNow,
+                                            }).ToListAsync();
+            if (getInfoOrderDetail != null)
+            {
+                return getInfoOrderDetail;
+            }else
+            {
+                return null;
+            }
+        }
+
         public async Task<bool> AddOrderDetailsAsync(Guid orderId)
         {
             var order = await _context.Orders.FirstOrDefaultAsync(x => x.Id == orderId);

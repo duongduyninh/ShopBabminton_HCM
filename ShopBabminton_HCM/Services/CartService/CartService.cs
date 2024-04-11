@@ -54,21 +54,19 @@ namespace ShopBabminton_HCM.Services.CartService
             return new UpdateCartResponse { Stastus = true, Message = "UpdateCart Success" ,CartDetail = result };
         }
 
-        public async Task<List<GetInfoInCartResultDTO>> GetInfoInCart(string UserId)
+        public async Task<GetInfoInCartDetailResponse> GetInfoInCart(string userId)
         {
-            try
-            {
-                bool checkIfUserHasCart = await _cartRepository.CheckIfUserHasCartAsync(UserId);
-                if (!checkIfUserHasCart) { return new List<GetInfoInCartResultDTO>(); }
 
-                var result = await _cartRepository.GetInfoInCartAsync(UserId);
-                return result;
-
-            }
-            catch(Exception ex)
+           bool checkIfUserHasCart = await _cartRepository.CheckIfUserHasCartAsync(userId);
+           if (!checkIfUserHasCart) { return new GetInfoInCartDetailResponse { Status = false , Message = "" }; }
+         
+           var result = await _cartRepository.GetInfoInCartAsync(userId);
+            if (result == null)
             {
-                return new List<GetInfoInCartResultDTO>();
+                return new GetInfoInCartDetailResponse { Status = false, Message = "" };
             }
+
+            return new GetInfoInCartDetailResponse { Status = true, Message = "Get Info CartDetail success" , cartDetail = result };
         }
 
     }

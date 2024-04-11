@@ -19,20 +19,56 @@ namespace ShopBabminton_HCM.Services.OrderService
             _cartRepository =cartRepository;
             _authenticationRepository = authenticationRepository;
         }
-        public async Task<OrderResultDTO> AddOrder(string? userId, Guid cartId)
+        public async Task<AddOrderResponse> AddOrder(AddOrderRequest addOrder)
         {
-            bool checkCartIdValid = await _cartRepository.CheckCartIdValidAsync(cartId);
-            if (!checkCartIdValid ) { return new OrderResultDTO { 
-                Status = false,
-                UserId = userId,
-                Operation = "AddOrder" ,
-                Message = " cartId invalid" };
+            bool checkUserIdValid = await _authenticationRepository.CheckUserIdValidAsync(addOrder.UserId);
+            if (checkUserIdValid)
+            {
+                bool isCartBelongToUser = await _cartRepository.CheckIsCartBelongToUser(addOrder);
+                if (!isCartBelongToUser)
+                {
+                    return new AddOrderResponse { Status = false, Message = "CartId do not match userId" };
+                }
             }
-            
-            bool result = await _orderRepository.AddOrderAsync(userId, cartId);
-            if (result) { return new OrderResultDTO { Status = true, UserId = userId, Operation = "AddOrder", Message = " " }; }
 
-            return new OrderResultDTO { Status = false ,UserId = userId, Operation = "AddOrder" }; ;
+            bool checkCartIdValid = await _cartRepository.CheckCartIdValidAsync(addOrder.CartId);
+            if (!checkCartIdValid ) { return new AddOrderResponse {  Status = false, Message = " cartId invalid" };}
+            
+            
+
+            var result = await _orderRepository.AddOrderAsync(addOrder);
+            if (result != null ) 
+            {
+                var getInfoOrderDetail = await _orderRepository.GetInfoOrderDetailAsync(result.Id);
+                if (getInfoOrderDetail != null)
+                {
+                    bool deleteCartDetailBeLongCartId = await _cartRepository.DeleteCartDetailBeLongCartIdAsync(addOrder.CartId);
+                    if (!deleteCartDetailBeLongCartId)
+                    {
+                        return new AddOrderResponse { Status = false, Message = "Delete cart detail be long cartId false " };
+                    }
+
+                    return new AddOrderResponse
+                    {
+                        Status = true,
+                        Message = "AddOrder succes",
+                        Order = result,
+                        OrderDetails = getInfoOrderDetail
+                    };
+
+                
+                }
+                else
+                {
+                    return new AddOrderResponse { Status = false, Message = "AddOrder false " };
+                }
+            }
+            else
+            {
+                 return new AddOrderResponse { Status = false, Message = "AddOrder false " }; 
+            }
+
+
         }
     }
 }

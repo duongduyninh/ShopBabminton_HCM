@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using ShopBabminton_HCM.Data;
 using ShopBabminton_HCM.DTOs.CartDTO;
+using ShopBabminton_HCM.DTOs.OrderDTO;
 using ShopBabminton_HCM.DTOs.ProductDTO;
 using ShopBabminton_HCM.Interfaces;
 using ShopBabminton_HCM.Models.Entities;
@@ -43,6 +44,51 @@ namespace ShopBabminton_HCM.Repositories
             }
         }
 
+        public async Task<CartDetailInfo> UpdateCartDetailAsync(UpdateCartRequest updateCart)
+        {
+            var updateCartDetail = await _context.CartDetails.FirstOrDefaultAsync(x => x.Id == updateCart.CartDetailId);
+            if (updateCartDetail != null)
+            {
+                updateCart.Updated = DateTime.UtcNow;
+                _mapper.Map(updateCart, updateCartDetail);
+                await _context.SaveChangesAsync();
+                return _mapper.Map<CartDetailInfo>(updateCart);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public async Task<List<CartDetailInfo>> GetInfoInCartAsync(string userId)
+        {
+            var getCartId = await _context.Carts.FirstOrDefaultAsync(x => x.UserId == userId);
+
+            if (getCartId == null)
+            {
+                return null;
+            }
+           
+            Guid cartId = getCartId.Id;
+
+            var getListCartDetail = await (from cartDetail in _context.CartDetails
+                                           where cartDetail.CartId == cartId
+                                           select new CartDetailInfo
+                                           {
+                                               CartId = cartDetail.CartId,
+                                               ProductId = cartDetail.ProductId,
+                                               Quantity = cartDetail.Quantity,
+
+                                           }).ToListAsync();
+            if (getListCartDetail != null)
+            {
+                return getListCartDetail;
+            }else
+            {
+                return null; 
+            }
+        }
+
         public async Task<bool> CreateCartAsync(string userId)
         {
             try
@@ -70,27 +116,6 @@ namespace ShopBabminton_HCM.Repositories
             return false;
         }
 
-        public async Task<List<GetInfoInCartResultDTO>> GetInfoInCartAsync(string userId)
-        {
-            var getCartId = await _context.Carts.FirstOrDefaultAsync(x => x.UserId == userId);
-            Guid cartId = getCartId.Id;
-
-            var getListCartDetail = await (from cartDetail in _context.CartDetails
-                                           where cartDetail.CartId == cartId
-                                           select new GetInfoInCartResultDTO
-                                           {
-                                               UserId = userId,
-                                               Id = cartDetail.Id,
-                                               CartId = cartDetail.CartId,
-                                               ProductId = cartDetail.ProductId,
-                                               Created = cartDetail.Created,
-                                               Updated = cartDetail.Updated,
-                                               Quantity = cartDetail.Quantity,
-
-                                           }).ToListAsync();
-            return getListCartDetail;
-        }
-
         public async Task<bool> CheckCartDetailIdValIdAsync(Guid cartDetailId)
         {
             return await _context.CartDetails.AnyAsync(x => x.Id == cartDetailId);
@@ -106,21 +131,22 @@ namespace ShopBabminton_HCM.Repositories
             return await _context.Carts.AnyAsync(x => x.UserId == userId);
         }
 
-        public async Task<CartDetailInfo> UpdateCartDetailAsync(UpdateCartRequest updateCart)
+        public async Task<bool> CheckIsCartBelongToUser(AddOrderRequest addOrder)
         {
-            var updateCartDetail = await _context.CartDetails.FirstOrDefaultAsync(x => x.Id == updateCart.CartDetailId);
-            if (updateCartDetail != null)
-            {
-                updateCart.Updated = DateTime.UtcNow;
-                _mapper.Map(updateCart, updateCartDetail);
-                await _context.SaveChangesAsync();
-                return _mapper.Map<CartDetailInfo>(updateCart);
-            }
-            else
-            {
-                return null;
-            }
+            var checkIsCartBelongToUser = await _context.Carts.FirstOrDefaultAsync(x => x.Id == addOrder.CartId && x.UserId == addOrder.UserId);
+            return checkIsCartBelongToUser != null;
         }
-    }   
-    
+
+        public async Task<bool> DeleteCartDetailBeLongCartIdAsync(Guid cartId)
+        {
+            var cartDetails = await _context.CartDetails.Where(x => x.CartId == cartId).ToListAsync();
+            if (cartDetails == null || cartDetails.Count == 0)
+            {
+                return false;
+            }
+            _context.CartDetails.RemoveRange(cartDetails);
+            return true;
+        }
+    }
+
 }

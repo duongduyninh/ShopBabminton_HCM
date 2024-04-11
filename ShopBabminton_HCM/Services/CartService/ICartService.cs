@@ -7,6 +7,6 @@ namespace ShopBabminton_HCM.Services.CartService
         public Task<AddItemToCartResponse> AddToCart(AddItemToCartRequest model);
         public Task<bool> RemoveItemInCart(Guid models);
         public Task<UpdateCartResponse> UpdateCart(UpdateCartRequest models);
-        public Task<List<GetInfoInCartResultDTO>> GetInfoInCart(string model);
+        public Task<GetInfoInCartDetailResponse> GetInfoInCart(string userId);
     }
 }

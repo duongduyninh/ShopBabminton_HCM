@@ -70,12 +70,12 @@ namespace ShopBabminton_HCM.Controllers
             }
         }
 
-        [HttpGet("GetInfoInCart/{id}")]
-        public async Task<IActionResult> GetInfoInCart(string id)
+        [HttpGet("GetInfoInCart/{userId}")]
+        public async Task<IActionResult> GetInfoInCart(string userId)
         {
             try
             {
-                var result = await _cartService.GetInfoInCart(id);
+                var result = await _cartService.GetInfoInCart(userId);
                 return Ok(result);
             }
             catch (Exception ex) { return BadRequest(ex.Message); }

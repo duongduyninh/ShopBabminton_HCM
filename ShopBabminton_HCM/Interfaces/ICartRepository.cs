@@ -1,4 +1,5 @@
 ﻿using ShopBabminton_HCM.DTOs.CartDTO;
+using ShopBabminton_HCM.DTOs.OrderDTO;
 using ShopBabminton_HCM.DTOs.ProductDTO;
 
 namespace ShopBabminton_HCM.Interfaces
@@ -12,6 +13,8 @@ namespace ShopBabminton_HCM.Interfaces
         public Task<bool> CheckCartDetailIdValIdAsync(Guid model);
         public Task<CartDetailInfo> UpdateCartDetailAsync(UpdateCartRequest model);
         public Task<bool> CheckIfUserHasCartAsync(string model);
-        public Task<List<GetInfoInCartResultDTO>> GetInfoInCartAsync(string model);
+        public Task<List<CartDetailInfo>> GetInfoInCartAsync(string model);
+        public Task<bool> CheckIsCartBelongToUser(AddOrderRequest models);
+        public Task<bool> DeleteCartDetailBeLongCartIdAsync(Guid cartId);
     }
 }
