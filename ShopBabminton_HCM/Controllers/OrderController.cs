@@ -15,7 +15,7 @@ namespace ShopBabminton_HCM.Controllers
         {
             _orderService = orderService;
         }
-        [HttpPost("AddOrder")]
+        [HttpPost]
         public async Task<IActionResult> AddOrder(AddOrderRequest addOrder)
         {
             try
@@ -30,7 +30,7 @@ namespace ShopBabminton_HCM.Controllers
                     return BadRequest(result);
                 }
             }
-            catch (Exception ex)
+            catch 
             {
                 return StatusCode(500);
             }

@@ -2,8 +2,13 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
+using Serilog.Events;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using ShopBabminton_HCM.Data;
 using ShopBabminton_HCM.Interfaces;
+using ShopBabminton_HCM.MiddlewareDemo;
 using ShopBabminton_HCM.Models.Entities;
 using ShopBabminton_HCM.Repositories;
 using ShopBabminton_HCM.Services.AuthenticationService;
@@ -29,6 +34,13 @@ builder.Services.AddCors(options =>
 builder.Services.AddIdentity<AppUser, IdentityRole>()
     .AddEntityFrameworkStores<DbContextStoreBabmintion>()
     .AddDefaultTokenProviders();
+
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.WithMachineName()
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 builder.Services.AddAutoMapper(typeof(Program));
 
@@ -84,6 +96,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseSerilogRequestLogging();
+
+//app.UseMiddleware<simpleMiddleWare>();
 
 app.UseHttpsRedirection();
 

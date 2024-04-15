@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 using ShopBabminton_HCM.DTOs.ProductDTO;
 using ShopBabminton_HCM.Models.Entities;
 using ShopBabminton_HCM.Services.ProductService;
@@ -11,12 +12,15 @@ namespace ShopBabminton_HCM.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductService _productService;
+        private readonly ILogger<ProductController> _logger;
 
-        public ProductController(IProductService productService)
+        public ProductController(IProductService productService
+                                ,ILogger<ProductController> logger)
         {
             _productService = productService;   
+            _logger = logger;
         }
-        [HttpPost("AddProduct")]
+        [HttpPost]
         public async Task<IActionResult> AddProduct(AddProductRequest addProduct)
         {
             try
@@ -34,7 +38,119 @@ namespace ShopBabminton_HCM.Controllers
             }catch { return StatusCode(500); }
         }
 
-        [HttpPut("UpdateProduct")]
+        [HttpDelete("{productid}")]
+        public async Task<IActionResult> DisableProduct(Guid productid)
+        {
+            try 
+            {
+                var result = await _productService.DisableProduct(productid);
+                if (result.Status) 
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest(result);
+                }
+            }catch { return StatusCode(500); }
+        }
+
+        [HttpGet("products/filter")]
+        public async Task<IActionResult> GetAllProductByFilter([FromQuery] GetAllProductRequest filter)
+        {
+            try
+            {
+                var result = await _productService.GetAllProductByFilter(filter);
+                if (result.Status)
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest(result);
+                }
+            }
+            catch { return StatusCode(500); }
+        }
+
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchProducts(string keySearch)
+        {
+            try
+            {
+                var result = await _productService.SearchProducts(keySearch);
+                if (result.Status)
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest(result);
+                }
+            }catch { return StatusCode(500); }
+        }
+
+        [HttpGet("status/{statusid}")]
+        public async Task<IActionResult> GetAllProductByStatus(int statusid)
+        {
+            try
+            {
+              var result = await _productService.GetAllProductByStatus(statusid);
+                if (result.Status)
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest(result);
+                }
+            }
+            catch { return StatusCode(500); }
+        }
+
+        [HttpGet("{productid}/details")]
+        public async Task<IActionResult> GetProductInfoById(Guid productid)
+        {
+            try
+            {
+                var result = await _productService.GetProductInfoById(productid);
+                if (result.Status)
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest(result);
+                }
+            }
+            catch 
+            {
+                return StatusCode(500);
+            }
+        }
+
+        [HttpGet("categoty/{categoryid}")]
+        public async Task<IActionResult> GetProductsByCategoryId(Guid categoryid) 
+        {
+            try
+            {
+                var result = await _productService.GetProductsByCategoryId(categoryid);
+                if (result.Status)
+                {
+                    return Ok(result);
+                }
+                else
+                {
+                    return BadRequest(result);
+                }
+            }
+            catch 
+            {
+                return StatusCode(500);
+            }
+        }
+
+        [HttpPut("update-product")]
         public async Task<IActionResult> UpdateProduct(UpdateProductRequest updateProduct)
         {
             try
@@ -49,57 +165,13 @@ namespace ShopBabminton_HCM.Controllers
                     return BadRequest(result);
                 }
             }
-            catch (Exception ex)
-            {
-                return StatusCode(500);
-            }
-        }
-
-        [HttpDelete("DisableProduct/{productId}")]
-        public async Task<IActionResult> DisableProduct(Guid productId)
-        {
-            try 
-            {
-                var result = await _productService.DisableProduct(productId);
-                if (result.Status) 
-                {
-                    return Ok(result);
-                }
-                else
-                {
-                    return BadRequest(result);
-                }
-            }catch { return StatusCode(500); }
-        }
-
-        [HttpGet("GetAllProductActive")]
-        public async Task<IActionResult> GetAllProductActive()
-        {
-            try
-            {
-                var result = await _productService.GetAllProductActive();
-                return Ok(result);
-            }catch
-            {
-                return StatusCode(500);
-            }
-        }
-
-        [HttpGet("GetAllProductInactive")]
-        public async Task<IActionResult> GetAllProductInactive()
-        {
-            try
-            {
-                var result = await _productService.GetAllProductInactive();
-                return Ok(result);
-            }
             catch
             {
                 return StatusCode(500);
             }
         }
 
-        [HttpPut("UpdateProductStatus")]
+        [HttpPut("update-productstatus")]
         public async Task<IActionResult> UpdateProductStatus(UpdateProductStatusRequest updateProduct)
         {
             try 
@@ -115,48 +187,6 @@ namespace ShopBabminton_HCM.Controllers
                 }
             }
             catch { return StatusCode(500); }
-        }
-
-        [HttpGet("ProductInfoById/{productId}")]
-        public async Task<IActionResult> GetProductInfoById(Guid productId)
-        {
-            try
-            {
-                var result = await _productService.GetProductInfoById(productId);
-                if (result.Status)
-                {
-                    return Ok(result);
-                }
-                else
-                {
-                    return BadRequest(result);
-                }
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500);
-            }
-        }
-
-        [HttpGet("GetProductsByCategoryId/{categoryId}")]
-        public async Task<IActionResult> GetProductsByCategoryId(Guid categoryId) 
-        {
-            try
-            {
-                var result = await _productService.GetProductsByCategoryId(categoryId);
-                if (result.Status)
-                {
-                    return Ok(result);
-                }
-                else
-                {
-                    return BadRequest(result);
-                }
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500);
-            }
         }
     }
 }

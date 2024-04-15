@@ -13,10 +13,11 @@ namespace ShopBabminton_HCM.Interfaces
         public Task<bool> CheckProdcutQuantityAsync(Guid models);
         public Task<ProductInfo> UpdateProductAsync(UpdateProductRequest model);
         public Task<bool> DisableProductAsync(Guid productId);
-        public Task<List<GetAllProductResponse>> GetAllProductActiveAsync();
-        public Task<List<GetAllProductResponse>> GetAllProductInactiveAsync();
-        public Task<List<GetAllProductResponse>> GetAllProductByStatusAsync(int statusCustomize);
+        public Task<List<ProductInfoById>> GetAllProductByStatusAsync(int status);
         public Task<bool> UpdateProductStatusAsync(UpdateProductStatusRequest model);
         public Task<ProductInfoById> GetProductInfoByIdAsync(Guid productId);
+        public Task<List<ProductInfoById>> GetAllProducts();
+        public Task<List<ProductInfoById>> GetAllProductByFilter(GetAllProductRequest models);
+        public Task<List<ProductInfoById>> SearchProductsAsync(string KeySearch);
     }
 }

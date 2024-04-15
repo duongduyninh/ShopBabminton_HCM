@@ -38,7 +38,7 @@ namespace ShopBabminton_HCM.Repositories
 
                 return _mapper.Map<ProductInfoById>(getProductInfoById);
             }
-            catch (Exception ex) 
+            catch
             {
                return null;
             }
@@ -60,16 +60,8 @@ namespace ShopBabminton_HCM.Repositories
             }
         }
 
-        public async Task<List<CartDetailInfo>> GetInfoInCartAsync(string userId)
+        public async Task<List<CartDetailInfo>> GetInfoInCartAsync(Guid cartId)
         {
-            var getCartId = await _context.Carts.FirstOrDefaultAsync(x => x.UserId == userId);
-
-            if (getCartId == null)
-            {
-                return null;
-            }
-           
-            Guid cartId = getCartId.Id;
 
             var getListCartDetail = await (from cartDetail in _context.CartDetails
                                            where cartDetail.CartId == cartId
@@ -101,7 +93,7 @@ namespace ShopBabminton_HCM.Repositories
                 _context.SaveChanges();
                 return true;
 
-            }catch (Exception ex) { return false; }
+            }catch { return false; }
         }
 
         public async Task<bool> RemoveItemInCartAsync(Guid cartDetailId)

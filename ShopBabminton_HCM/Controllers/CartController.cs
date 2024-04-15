@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ShopBabminton_HCM.DTOs.CartDTO;
 using ShopBabminton_HCM.Services.CartService;
@@ -15,7 +16,7 @@ namespace ShopBabminton_HCM.Controllers
         {
             _cartService = cartService;
         }
-        [HttpPost("AddToCart")]
+        [HttpPost]
         public async Task<IActionResult> AddToCart(AddItemToCartRequest addToCart)
         {
             try
@@ -29,13 +30,13 @@ namespace ShopBabminton_HCM.Controllers
                 {
                     return BadRequest(result);
                 }
-            }catch (Exception ex) 
+            }catch 
             {
                 return StatusCode(500);
             }
         }
 
-        [HttpDelete("RemoveItemInCart")]
+        [HttpDelete("")]
         public async Task<IActionResult> RemoveItemInCart(Guid cartDetailId)
         {
             try
@@ -49,7 +50,7 @@ namespace ShopBabminton_HCM.Controllers
             }
         }
 
-        [HttpPut("UpdateCart")]
+        [HttpPut]
         public async Task<IActionResult> UpdateCart(UpdateCartRequest updateCart)
         {
             try
@@ -64,18 +65,18 @@ namespace ShopBabminton_HCM.Controllers
                     return BadRequest(result);
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 return StatusCode(500);
             }
         }
 
-        [HttpGet("GetInfoInCart/{userId}")]
-        public async Task<IActionResult> GetInfoInCart(string userId)
+        [HttpGet("{carid}/details")]
+        public async Task<IActionResult> GetInfoInCart(Guid carid)
         {
             try
             {
-                var result = await _cartService.GetInfoInCart(userId);
+                var result = await _cartService.GetInfoInCart(carid);
                 return Ok(result);
             }
             catch (Exception ex) { return BadRequest(ex.Message); }

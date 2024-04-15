@@ -17,7 +17,7 @@ namespace ShopBabminton_HCM.Controllers
             _categoryService = categoryService;
         }
 
-        [HttpPost("AddCategory")]
+        [HttpPost]
         public async Task<IActionResult> AddCategory(AddCategoryRequest addCategory)
         {
             try
@@ -35,7 +35,7 @@ namespace ShopBabminton_HCM.Controllers
             catch { return StatusCode(500); }
         }
        
-        [HttpDelete("DeleteCategory/{CategoryId}")]
+        [HttpDelete("{CategoryId}")]
         public async Task<IActionResult> DeleteCategory(Guid CategoryId)
         {
             try
@@ -53,7 +53,7 @@ namespace ShopBabminton_HCM.Controllers
             catch { return StatusCode(500); }
         }
       
-        [HttpPut("UpdateCategory")]
+        [HttpPut]
         public async Task<IActionResult> UpdateCategory(UpdateCategoryRequest updateCategory)
         {
             try

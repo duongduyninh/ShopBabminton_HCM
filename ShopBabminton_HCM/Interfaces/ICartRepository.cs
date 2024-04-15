@@ -13,7 +13,7 @@ namespace ShopBabminton_HCM.Interfaces
         public Task<bool> CheckCartDetailIdValIdAsync(Guid model);
         public Task<CartDetailInfo> UpdateCartDetailAsync(UpdateCartRequest model);
         public Task<bool> CheckIfUserHasCartAsync(string model);
-        public Task<List<CartDetailInfo>> GetInfoInCartAsync(string model);
+        public Task<List<CartDetailInfo>> GetInfoInCartAsync(Guid cartId);
         public Task<bool> CheckIsCartBelongToUser(AddOrderRequest models);
         public Task<bool> DeleteCartDetailBeLongCartIdAsync(Guid cartId);
     }

@@ -15,7 +15,7 @@ namespace ShopBabminton_HCM.Controllers
         {
             _authenticationService = authenticationService;
         }
-        [HttpPost("SignUp")]
+        [HttpPost("signup")]
         public async Task<IActionResult> SignUp(SignUpDTO SignUp)
         {
             var result = await _authenticationService.SignUpAsync(SignUp);
@@ -27,7 +27,7 @@ namespace ShopBabminton_HCM.Controllers
 
             return BadRequest(result.Errors);
         }
-        [HttpPost("SignIn")]
+        [HttpPost("signin")]
         public async Task<IActionResult> SignIn(SignInDTO SignIn)
         {
             var result = await _authenticationService.SignInAsync(SignIn);

@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ShopBabminton_HCM.Data;
 using ShopBabminton_HCM.DTOs.ProductDTO;
 using ShopBabminton_HCM.Interfaces;
 using ShopBabminton_HCM.Models.Entities;
 using ShopBabminton_HCM.Repositories;
+using System.Text.RegularExpressions;
 
 namespace ShopBabminton_HCM.Services.ProductService
 {
@@ -102,7 +104,7 @@ namespace ShopBabminton_HCM.Services.ProductService
                 return result;
 
             }
-            catch (Exception ex)
+            catch
             {
                 return new List<ProductInfoById>();
             }
@@ -115,7 +117,7 @@ namespace ShopBabminton_HCM.Services.ProductService
                 var result = await _productRepository.GetProductAsync(ProductId);
                  return result;
 
-            }catch (Exception ex)
+            }catch
             {
                 return new ProductInfoById();
             }
@@ -202,16 +204,25 @@ namespace ShopBabminton_HCM.Services.ProductService
             }
         }
 
-        public async Task<List<GetAllProductResponse>> GetAllProductActive()
+        public async Task<GetAllProductResponse> GetAllProductByStatus(int status)
         {
-            var result = await _productRepository.GetAllProductActiveAsync();
-            return result;
-        }
+            var result = await _productRepository.GetAllProductByStatusAsync(status);
+            if(result != null)
+            {
+                return new GetAllProductResponse
+                {
+                    Status = true,
+                    Message = " Get all product by status success",
+                    ProductInfo = result
+                };
+            }
 
-        public async Task<List<GetAllProductResponse>> GetAllProductInactive()
-        {
-            var result = await _productRepository.GetAllProductActiveAsync();
-            return result;
+            return new GetAllProductResponse
+            {
+                Status = false,
+                Message = " Get all product by status success",
+                ProductInfo = null
+            };
         }
 
         public async Task<UpdateProductStatusResponse> UpdateProductStatus(UpdateProductStatusRequest updateProduct)
@@ -248,5 +259,86 @@ namespace ShopBabminton_HCM.Services.ProductService
             }
         }
 
+        public async Task<GetAllProductResponse> GetAllProductByFilter(GetAllProductRequest getProductByFilter)
+        {
+
+            if (getProductByFilter == null ||
+                ( getProductByFilter.CategoryId == null
+                && getProductByFilter.PriceFrom == null
+                && getProductByFilter.PriceTo == null))
+            {
+                var result = await _productRepository.GetAllProducts();
+                if (result != null)
+                {
+                    return new GetAllProductResponse
+                    {
+                        Status = true,
+                        Message = "Get product success",
+                        ProductInfo = result
+                    };
+                }
+            }
+            else
+            {
+                var result = await _productRepository.GetAllProductByFilter(getProductByFilter);
+                if (result != null)
+                {
+                    return new GetAllProductResponse
+                    {
+                        Status = true,
+                        Message = "Get product success",
+                        ProductInfo = result
+                    };
+                }
+                else
+                {
+                    return new GetAllProductResponse
+                    {
+                        Status = false,
+                        Message = "There are no products that match the filter",
+                        ProductInfo = null
+                    };
+                }
+            }
+            return null;
+        }
+
+        public async Task<SearchProductResponse> SearchProducts(string keySearch)
+        {
+            string pattern = "[^a-zA-Z0-9]";
+            Regex regex = new Regex(pattern);
+
+            string keySearchFiltered = regex.Replace(keySearch, "").Trim();
+
+            if (string.IsNullOrEmpty(keySearchFiltered))
+            {
+                return new SearchProductResponse
+                {
+                    Status = false,
+                    Message = "Invalid search keyword",
+                    ProductInfo = null
+                };
+            }
+
+            var result = await _productRepository.SearchProductsAsync(keySearchFiltered);
+            if (result != null)
+            {
+                return new SearchProductResponse
+                {
+                    Status = true,
+                    Message = "Search true",
+                    ProductInfo = result
+                };
+            }
+            else
+            {
+                return new SearchProductResponse
+                {
+                    Status = false,
+                    Message = "Search true",
+                    ProductInfo = result
+                };
+            }
+        }
     }
 }

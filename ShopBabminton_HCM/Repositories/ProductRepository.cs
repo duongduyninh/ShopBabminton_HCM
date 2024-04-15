@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using ShopBabminton_HCM.Data;
 using ShopBabminton_HCM.DTOs.ProductDTO;
 using ShopBabminton_HCM.Interfaces;
@@ -26,7 +27,7 @@ namespace ShopBabminton_HCM.Repositories
             try
             {
                 var addToProdcut = _mapper.Map<Product>(addProduct);
-                _context.Products.AddAsync(addToProdcut);
+                await _context.Products.AddAsync(addToProdcut);
 
                 await _context.SaveChangesAsync();
 
@@ -76,7 +77,7 @@ namespace ShopBabminton_HCM.Repositories
                                       }).FirstOrDefaultAsync();
                 return getInfoProduct; 
             }
-            catch (Exception ex)
+            catch 
             {
                 return new ProductInfoById();
             }
@@ -99,9 +100,9 @@ namespace ShopBabminton_HCM.Repositories
 
                 return getListInfoProducts;
             }
-            catch (Exception ex)
+            catch
             {
-                throw ex;
+                return null;
             }
         }
 
@@ -158,25 +159,13 @@ namespace ShopBabminton_HCM.Repositories
             }
         }
 
-        public async Task<List<GetAllProductResponse>> GetAllProductActiveAsync()
-        {
-            var getAllProductActive = await GetAllProductByStatusAsync(1);
-            return getAllProductActive;
-        }
-
-        public async Task<List<GetAllProductResponse>> GetAllProductInactiveAsync()
-        {
-            var getAllProductActive = await GetAllProductByStatusAsync(0);
-            return getAllProductActive;
-        }
-
-        public async Task<List<GetAllProductResponse>> GetAllProductByStatusAsync(int statusCustomize)
+        public async Task<List<ProductInfoById>> GetAllProductByStatusAsync(int statusCustomize)
         {
             int statusCustomizeTMP = statusCustomize;
             var StatusProducts = await(from product in _context.Products
                                        join category in _context.Categorys on product.CategoryId equals category.Id
                                        where product.Status != statusCustomizeTMP
-                                       select new GetAllProductResponse
+                                       select new ProductInfoById
                                        {
                                            ProductId = product.Id,
                                            ProductName = product.ProductName,
@@ -221,6 +210,78 @@ namespace ShopBabminton_HCM.Repositories
             }
             else { return null; }
         }
-   
+
+        public async Task<List<ProductInfoById>> GetAllProducts()
+        {
+            var getAllProducts = await(from product in _context.Products
+                                       join category in _context.Categorys on product.CategoryId equals category.Id
+                                       select new ProductInfoById
+                                       {
+                                           ProductId = product.Id,
+                                           ProductName = product.ProductName,
+                                           Description = product.Description,
+                                           Price = product.Price,
+                                           Quantity = product.Quantity,
+                                           CategoryName = category.CategoryName
+                                       }).ToListAsync();
+            if(getAllProducts != null)
+            {
+                return getAllProducts;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public async Task<List<ProductInfoById>> GetAllProductByFilter(GetAllProductRequest filter)
+        {
+            var products = await (from p in _context.Products
+                                  join c in _context.Categorys on p.CategoryId equals c.Id
+                                  where (filter.CategoryId == null || p.CategoryId == filter.CategoryId) &&
+                                        (filter.PriceFrom == null || p.Price >= filter.PriceFrom) &&
+                                        (filter.PriceTo == null || p.Price <= filter.PriceTo)
+                                  select new ProductInfoById
+                                  {
+                                      ProductId = p.Id,
+                                      ProductName = p.ProductName,
+                                      Description = p.Description,
+                                      Price = p.Price,
+                                      Quantity = p.Quantity,
+                                      CategoryName = c.CategoryName
+                                  }).ToListAsync();
+
+
+            if (products != null)
+            {
+                return products;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public async Task<List<ProductInfoById>> SearchProductsAsync(string KeySearch)
+        {
+            var searchProduct = await (from p in _context.Products
+                                       join c in _context.Categorys on p.CategoryId equals c.Id
+                                       where p.ProductName.ToLower().Contains(KeySearch.ToLower())
+                                       select new ProductInfoById
+                                       {
+                                           ProductId = p.Id,
+                                           ProductName = p.ProductName,
+                                           Description = p.Description,
+                                           Price = p.Price,
+                                           Quantity = p.Quantity,
+                                           CategoryName = c.CategoryName
+                                       }
+                                       ).ToListAsync();
+            if( searchProduct != null ) { return searchProduct;}
+            else
+            {
+                return null;
+            }
+        }
     }
 }
